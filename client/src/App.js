@@ -10,10 +10,12 @@ import { EduFooter } from './components/EduFooter';
 
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import MyRooms from './components/MyRooms';
+import Reset from './components/ResetPassword';
+import ResetPasswordConfirm from './components/ResetPasswordConfirm';
 
 function App() {
   return (
-    <div>
+    <div className="flex flex-col ">
       <BrowserRouter>
         <EduNavbar />
         <Switch>
@@ -39,6 +41,15 @@ function App() {
             <MyRooms />
           </Route>
         </Switch>
+        <Route exact path="/profile/:id">
+          <Profile />
+        </Route>
+        <Route exact path="/reset">
+          <Reset />
+        </Route>
+        <Route exact path="/reset/:id">
+          <ResetPasswordConfirm />
+        </Route>
       </BrowserRouter>
       <EduFooter />
     </div>

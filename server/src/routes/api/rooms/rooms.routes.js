@@ -20,13 +20,11 @@ router.get('/api/rooms', async (req, res) => {
 
 router.post('/api/rooms', async (req, res) => {
   let rooms = await Rooms.find();
-  console.log(req.body.id);
   rooms = rooms.filter((x) => x.master._id === req.body.id);
   res.send(rooms);
 });
 
 router.post('/api/rooms/find', async (req, res, next) => {
-  console.log(req.body);
   Rooms.findOne({ _id: req.body.id }, (err, room) => {
     if (err)
       return res.status(500).json({
@@ -50,18 +48,6 @@ router.post('/api/rooms/find', async (req, res, next) => {
         error: 'password is not correct',
       });
     } else {
-      Rooms.findOneAndUpdate(
-        { _id: room._id },
-        { members: room.members + 1 },
-        { new: true },
-        (er, doc) => {
-          if (er) {
-            console.log(er);
-          }
-          console.log(doc);
-        }
-      );
-      room.members += 1;
       return res.status(200).json({
         title: 'Room join success',
         error: ``,

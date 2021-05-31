@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 async function login(user) {
   return fetch('http://localhost:5000/login', {
@@ -99,18 +99,18 @@ export default function Login() {
                 </button>
               </div>
               <div className="flex flex-col ml-7 space-y-3">
-                <router-link
+                <Link
                   className="text-xs text-gray-400 items-center hover:text-red-800"
                   to="/register"
                 >
                   Don't have an account? Register here!
-                </router-link>
-                <router-link
+                </Link>
+                <Link
                   className="text-xs text-gray-400 items-center hover:text-red-800"
-                  to="/reset-password"
+                  to="/reset"
                 >
                   Forgot password? Reset here!
-                </router-link>
+                </Link>
               </div>
             </div>
             <div className="flex justify-end items-center"></div>

@@ -4,6 +4,7 @@ class RoomsService {
   constructor() {}
 
   removeMembers(id) {
+    console.log('removing id: ' + id);
     Rooms.findOne({ _id: id }, (err, room) => {
       if (err) {
         return;

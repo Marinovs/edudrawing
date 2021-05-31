@@ -2,7 +2,7 @@ import React from 'react';
 
 export function EduFooter() {
   return (
-    <div className="h-14 bg-red-800 w-full bottom-0 flex items-center justify-center fixed">
+    <div className="h-14 bg-red-800 w-full bottom-0 flex items-center justify-between px-2 md:px-8 fixed">
       <div className="hidden md:flex flex justify-center w-100">
         <a href="/" className="text-gray-700 hover:text-white-300 m-2">
           <svg
@@ -59,23 +59,18 @@ export function EduFooter() {
           <p className="text-white">Socials</p>
         </div>
       </div>
-      <div className="flex m-24">
-        <p className="text-white italic font-thin text-xs">
-          Copyright © 2021 Rome Italy. All rights reserved.
-        </p>
+      <div className="flex flex-row">
+        <div className="hidden md:flex">
+          <p className="text-white italic font-thin text-xs">
+            Copyright © 2021 Rome Italy. All rights reserved.
+          </p>
+        </div>
+        <div className="md:hidden ">
+          <p className="text-white italic font-thin text-xs ">Edudrawing ©</p>
+        </div>
       </div>
       <div className="hidden md:flex flex flex-col">
-        <ul className="flex flex-row text-white items-end space-x-12">
-          <li>
-            <a href="/chat">Live Chat</a>
-          </li>
-          <li>
-            <a href="/email">Email</a>
-          </li>
-          <li>
-            <a href="/call">Call us</a>
-          </li>
-        </ul>
+        <ul className="flex flex-row text-white items-end space-x-12"></ul>
       </div>
       <div className="md:hidden flex flex-col items-center ml-12">
         <svg

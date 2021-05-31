@@ -4,6 +4,9 @@ import 'quill/dist/quill.snow.css';
 import { io } from 'socket.io-client';
 import { useParams } from 'react-router-dom';
 
+import { pdfExporter } from 'quill-to-pdf';
+import { saveAs } from 'file-saver';
+
 import {
   Button,
   Dialog,
@@ -26,6 +29,7 @@ const TOOLBAR_OPTIONS = [
   ['clean'],
   ['room'],
   ['close'],
+  ['download'],
 ];
 
 export default function TextEditor() {
@@ -53,9 +57,21 @@ export default function TextEditor() {
     const closeButton = document.getElementsByClassName('ql-close')[0];
     closeButton.type = 'submit';
     closeButton.addEventListener('click', () => {
-      setOpenCloseRoom(true);
+      if (room.master._id === user._id) setOpenCloseRoom(true);
     });
   }, []);
+
+  useEffect(() => {
+    if (quill === undefined || room === undefined) return;
+
+    const downloadButton = document.getElementsByClassName('ql-download')[0];
+    downloadButton.type = 'submit';
+    downloadButton.addEventListener('click', async () => {
+      const quillDelta = quill.getContents();
+      const pdfBlob = await pdfExporter.generatePdf(quillDelta);
+      saveAs(pdfBlob, `${room.name}_${room.subject}.pdf`);
+    });
+  }, [quill]);
 
   const handleRoomInfoClose = () => {
     setOpenRoomInfo(false);
@@ -76,6 +92,15 @@ export default function TextEditor() {
   const handleOpenMember = (u) => {
     setSelectedMember(u);
     if (room.master._id === user._id) setOpenMember(true);
+  };
+
+  const handleViewProfile = () => {
+    console.log(selectedMember.user._id);
+    sessionStorage.setItem(
+      'selected_user',
+      JSON.stringify(selectedMember.user)
+    );
+    window.location.href = `http://localhost:3000/profile/${selectedMember.user._id}`;
   };
 
   const handleGrantPermission = () => {
@@ -100,8 +125,8 @@ export default function TextEditor() {
         id: room._id,
       }),
     });
+
     const data = await response.json();
-    console.log(data);
     if (data.status === 200) {
       socket.emit('send-kick');
     } else {
@@ -177,8 +202,8 @@ export default function TextEditor() {
 
   useEffect(() => {
     if (socket === undefined) return;
-    socket.on('receive-users', function (data) {
-      setMembers(data);
+    socket.on('receive-users', function (users, r) {
+      setMembers(users);
     });
   }, [socket]);
 
@@ -189,7 +214,6 @@ export default function TextEditor() {
       let found = false;
 
       for (const u in data) {
-        console.log(data[u].user.name);
         if (data[u].user._id === user._id) found = true;
       }
       if (!found) quill.enable(false);
@@ -253,6 +277,7 @@ export default function TextEditor() {
 
     wrapper.innerHTML = '';
     const editor = document.createElement('div');
+    editor.id = 'quill-editor';
     wrapper.append(editor);
     const q = new Quill(editor, {
       theme: 'snow',
@@ -260,6 +285,7 @@ export default function TextEditor() {
     });
     q.disable();
     q.setText('Loading...');
+    console.log(q);
     setQuill(q);
   }, []);
   return (
@@ -286,10 +312,10 @@ export default function TextEditor() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{`${room.members} members`}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{`${members.length} members`}</DialogTitle>
         <ListItemIcon className="flex flex-col justify-center">
           {members.map((u, i) => (
-            <ul key={i} className="no-underline !important">
+            <ul key={u._id} className="no-underline !important">
               <div className="flex flex-row space-x-2 ">
                 <img
                   className="rounded-full bg-white h-8 w-8 mx-2 my-2"
@@ -315,7 +341,7 @@ export default function TextEditor() {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">Select an action!</DialogTitle>
-        <Button>View Profile</Button>
+        <Button onClick={handleViewProfile}>View Profile</Button>
         <Button onClick={handleGrantPermission}>Grant permess to write</Button>
         <Button onClick={handleRemovePermission}>
           Remove permess to write

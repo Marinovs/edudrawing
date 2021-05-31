@@ -4,6 +4,7 @@ const Users = require('./users.model');
 const bcrypt = require('bcrypt');
 const TokenGenerator = require('uuid-token-generator');
 const Infos = require('../infos/infos.model');
+const Passwords = require('../passwords/passwords.model');
 
 const router = express.Router();
 mongoose.set('useNewUrlParser', true);
@@ -18,6 +19,27 @@ mongoose.connect(
 router.get('/api/users', async (req, res) => {
   const users = await Users.find();
   res.send(users);
+});
+
+router.post('/api/users/find', async (req, res) => {
+  let users = await Users.find();
+  let info = null;
+  users = users.filter((x) => x._id == req.body.id);
+  if (users) {
+    info = await Infos.findOne({ userId: req.body.id });
+  }
+  return res.json({
+    user: users,
+    info: info,
+  });
+});
+
+router.post('/api/users/findByEmail', async (req, res) => {
+  let users = await Users.find();
+  users = users.filter((x) => x.email == req.body.email);
+  return res.json({
+    user: users,
+  });
 });
 
 router.patch('/api/users/update', async (req, res) => {
@@ -92,6 +114,75 @@ router.post('/login', async (req, res, next) => {
       });
     }
   });
+});
+
+router.patch('/api/users/reset', async (req, res) => {
+  if (
+    req.body.id === null ||
+    req.body.id.length > 24 ||
+    req.body.id.length < 24
+  )
+    return res.status(500).json({
+      title: 'Find failed',
+      error: 'Failed to find user',
+    });
+
+  const user = await Users.findOne({
+    _id: req.body.id,
+  });
+
+  if (user === null)
+    return res.status(500).json({
+      title: 'USER',
+      error: 'Failed to find user',
+    });
+
+  const passw = await Passwords.findOne({ verification_code: req.body.code });
+
+  if (passw === null)
+    return res.status(500).json({
+      title: 'NOT-FOUND',
+      error: 'Failed to find generation code',
+    });
+
+  if (passw.isUsed)
+    return res.status(500).json({
+      title: 'USED',
+      error: 'Already used',
+    });
+
+  await Users.findOneAndUpdate(
+    {
+      _id: req.body.id,
+    },
+    { password: bcrypt.hashSync(req.body.password, 10) },
+    { new: true },
+    (err) => {
+      if (err) {
+        return res.status(500).json({
+          title: 'Error',
+          error: err,
+        });
+      }
+      Passwords.findOneAndUpdate(
+        { verification_code: req.body.code },
+        { isUsed: true },
+        { new: true },
+        (er) => {
+          if (err) {
+            return res.status(500).json({
+              title: 'Error',
+              error: err,
+            });
+          } else {
+            return res.status(200).json({
+              title: 'Success',
+            });
+          }
+        }
+      );
+    }
+  );
 });
 
 router.post('/register', async (req, res) => {

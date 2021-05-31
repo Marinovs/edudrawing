@@ -8,6 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { Avatar, Typography } from '@material-ui/core';
 
 export default class Rooms extends React.Component {
   constructor(props) {
@@ -22,14 +23,17 @@ export default class Rooms extends React.Component {
       checked: false,
       open: false,
       start: 0,
-      end: 4,
+      end: 3,
       pswDialog: false,
       room: null,
       redirected: false,
+      joinDialog: false,
     };
   }
 
   async componentDidMount() {
+    sessionStorage.removeItem('room');
+
     if (sessionStorage.getItem('user') === null)
       window.location.href = 'http://localhost:3000/';
 
@@ -49,8 +53,6 @@ export default class Rooms extends React.Component {
 
     this.setState({ rooms: await fetchRooms() });
     this.setState({ users: await fetchUsers() });
-
-    console.log(this.state.rooms);
   }
 
   render() {
@@ -101,15 +103,15 @@ export default class Rooms extends React.Component {
 
     const handleNextPage = () => {
       if (this.state.end < this.state.rooms.length) {
-        this.setState({ end: this.state.end + 4 });
-        this.setState({ start: this.state.start + 4 });
+        this.setState({ end: this.state.end + 3 });
+        this.setState({ start: this.state.start + 3 });
       }
     };
 
     const handlePrevPage = () => {
       if (this.state.start > 0) {
-        this.setState({ end: this.state.end - 4 });
-        this.setState({ start: this.state.start - 4 });
+        this.setState({ end: this.state.end - 3 });
+        this.setState({ start: this.state.start - 3 });
       }
     };
 
@@ -127,7 +129,6 @@ export default class Rooms extends React.Component {
       }).catch((err) => {
         console.log('ERR: ', err);
       });
-      console.log(response);
       if (response.token === undefined) {
         createErrorNotification(response);
       } else {
@@ -139,13 +140,22 @@ export default class Rooms extends React.Component {
       }
     };
 
-    const handleJoin = async (room) => {
-      console.log(room);
+    const handleJoin = async (data) => {
+      const room = data[0];
+      const f = data[1];
+
       if (room !== null) {
         this.setState({ room: room });
       }
+
+      if (document.body.scrollWidth <= 764 && !f) {
+        this.setState({ joinDialog: true });
+        return;
+      }
+
       if (room.password != null) {
         this.setState({ pswDialog: true });
+        return;
       }
 
       sessionStorage.setItem('room', JSON.stringify(room));
@@ -179,18 +189,18 @@ export default class Rooms extends React.Component {
     };
 
     return (
-      <div id="main h-full">
+      <div id="main" className="h-auto w-auto">
         <div className="flex flex-col">
-          <div
-            className="
-flex flex-col justify-center items-center mt-32"
-          >
+          <div className="flex flex-col justify-center items-center mt-32">
             <div className="flex flex-row" id="rooms">
-              <div className="flex flex-row space-x-5">
+              <div className="flex flex-col space-y-12 md:flex-row md:space-y-0">
                 {this.state.rooms
                   .slice(this.state.start, this.state.end)
                   .map((room, i) => (
-                    <div className="flex space-x-4 px-4 justify-around">
+                    <div
+                      key={room._id}
+                      className="flex space-x-4 px-4 justify-around"
+                    >
                       <div
                         className="bg-gray-200  h-52 w-14
       md:w-52
@@ -200,7 +210,11 @@ flex flex-col justify-center items-center mt-32"
                       >
                         <img
                           className="rounded-full w-16 h-16 shadow-sm absolute -top-8 transform md:scale-110 duration-700"
-                          src="https://randomuser.me/api/portraits/women/17.jpg"
+                          src={
+                            room.master.info?.img !== ''
+                              ? '/uploads/' + room.master.info?.img
+                              : 'https://image.flaticon.com/icons/png/512/847/847969.png'
+                          }
                           alt=""
                         />
                         <div
@@ -214,34 +228,44 @@ flex flex-col justify-center items-center mt-32"
                           <li>👩‍🏫 Master: {room.master.name}</li>
                           <li>🏫 Subject: {room.subject}</li>
                           <li>🧑‍🎓 Members: {room.members}</li>
-                          <li
-                            id="passwordBox"
-                            hidden={room.password === undefined}
-                          >
-                            <label
-                              className="bg-transparent border-gray-300"
-                              htmlFor="password"
-                            >
-                              🔐 Password:
-                            </label>
-                            <input
-                              required
-                              className="bg-transparent rounded rounded-full border border-black text-xs ml-3"
-                              type="password"
-                              id="passwordRoom"
-                            />
-                          </li>
                         </ul>
                         <div className="flex w-full justify-around">
                           <button
-                            onClick={() => handleJoin(room)}
-                            value={room}
+                            onClick={() => handleJoin([room, false])}
+                            value={[room, false]}
                             className="bg-red-700 text-white font-bold rounded rounded-full w-24 h-8 mt-1"
                           >
                             Join
                           </button>
                         </div>
                       </div>
+
+                      <Dialog
+                        onClose={() => this.setState({ joinDialog: false })}
+                        open={this.state.joinDialog}
+                      >
+                        <DialogTitle>{room.name}</DialogTitle>
+                        <DialogContent>
+                          <Typography>👩‍🏫 Master: {room.master.name}</Typography>
+                          <Typography>🏫 Subject: {room.subject}</Typography>
+                          <Typography>🧑‍🎓 Members: {room.members}</Typography>
+                          <Button
+                            value={[room, true]}
+                            onClick={() => handleJoin([room, true])}
+                            variant="contained"
+                            color="secondary"
+                          >
+                            JOIN
+                          </Button>
+                          <Button
+                            onClick={() => this.setState({ joinDialog: false })}
+                            variant="contained"
+                            color="primary"
+                          >
+                            CLOSE
+                          </Button>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   ))}
               </div>
@@ -249,7 +273,7 @@ flex flex-col justify-center items-center mt-32"
           </div>
           <div></div>
 
-          <div className="flex justify-center space-x-96 mt-48 w-screen">
+          <div className="flex flex-col space-y-4 mt-12 md:flex-row items-center w-auto md:space-x-24 md:justify-center">
             <div>
               <button
                 onClick={handlePrevPage}

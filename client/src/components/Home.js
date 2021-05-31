@@ -3,6 +3,10 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 export default class Home extends Component {
+  componentDidMount() {
+    sessionStorage.removeItem('room');
+  }
+
   render() {
     return (
       <div className="flex flex-col">

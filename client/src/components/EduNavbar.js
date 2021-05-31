@@ -70,8 +70,8 @@ function notAuthenticated() {
 
 function authenticated() {
   return (
-    <div id="navbar">
-      <nav className="bg-red-800 w-full inline-block">
+    <div id="navbar" className="bg-red-800">
+      <nav className="">
         <div className="px-8 py-5 mx-10">
           <div className="flex justify-between">
             <div className="flex items-center space-x-6">
@@ -85,7 +85,15 @@ function authenticated() {
                   <div className="flex items-center space-x-6">
                     <Link
                       className="font-bold text-white uppercase"
-                      to="/myprofile"
+                      onClick={() => {
+                        sessionStorage.setItem(
+                          'selected_user',
+                          JSON.stringify(token)
+                        );
+                        window.location.reload();
+                        window.location.href = `http://localhost:3000/profile/${token._id}`;
+                      }}
+                      to={`http://localhost:3000/profile/${token._id}`}
                     >
                       {token.name}
                     </Link>
@@ -104,15 +112,15 @@ function authenticated() {
                       <button onClick={showSubMenu}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          class="h-6 w-6"
+                          className="h-6 w-6"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="white"
                         >
                           <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
                             d="M19 13l-7 7-7-7m14-8l-7 7-7-7"
                           />
                         </svg>
@@ -145,11 +153,16 @@ function authenticated() {
         <div id="subMenu" hidden>
           <Link
             className="flex py-2 px-4 text-sm text-white hover:bg-gray-200 hover:text-red-800"
-            to="/myprofile"
+            onClick={() => {
+              sessionStorage.setItem('selected_user', JSON.stringify(token));
+              window.location.reload();
+              window.location.href = `http://localhost:3000/profile/${token._id}`;
+            }}
+            to={`http://localhost:3000/profile/${token._id}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2 "
+              className="h-4 w-4   "
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

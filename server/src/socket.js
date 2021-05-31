@@ -38,9 +38,9 @@ class Socket {
             }
           );
         });
-        console.log(`${user._id}:${user.name} connected`);
         users.push({ user: user, room: room, socket: socket.id });
         if (room !== undefined) RService.addMembers(room);
+
         io.to(page.roomId).emit('receive-users', users);
 
         let writerMaster = writers.find(
@@ -75,7 +75,6 @@ class Socket {
         if (user) {
           users.splice(users.indexOf(user), 1);
           if (user.room !== null) RService.removeMembers(user.room);
-          console.log(`${user.user._id}:${user.user.name} disconnected`);
           io.to(user.room).emit('receive-users', users);
         }
       });

@@ -8,7 +8,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 
 function createNotification(response, type) {
-  console.log(type);
   document.getElementById('alert')?.remove();
   const alertDiv = document.createElement('div');
   alertDiv.id = 'alert';
@@ -31,15 +30,22 @@ function createNotification(response, type) {
 
 export default function Profile() {
   const user = JSON.parse(sessionStorage.getItem('user')) ?? null;
+  const profileUser =
+    JSON.parse(sessionStorage.getItem('selected_user')) ?? null;
 
   useEffect(() => {
-    console.log(window.location.origin);
-    if (user === null) {
+    sessionStorage.removeItem('room');
+
+    console.log(profileUser._id === user._id);
+    if (profileUser._id !== user._id) {
+      document.getElementById('btn-update').className = 'hidden';
+    }
+    if (user === null || profileUser === null) {
       window.location.href = 'http://localhost:3000/';
     }
-  }, [user]);
+  }, [user, profileUser]);
 
-  const info = user?.info ?? null;
+  const info = profileUser?.info ?? null;
   const [infoDialog, setOpenInfo] = useState(false);
   const [securityDialog, setOpenSecurity] = useState(false);
   const [notificationDialog, setOpenNotification] = useState(false);
@@ -49,6 +55,7 @@ export default function Profile() {
   const [password, setPassword] = useState();
   const [cpassword, setCPassword] = useState();
   const [oldpassword, setOldPassword] = useState();
+  const isEditable = profileUser._ === user._id;
 
   useEffect(() => {
     const notificationElement = document.getElementById('notification-text');
@@ -98,6 +105,7 @@ export default function Profile() {
   };
 
   const handleUpdateInfo = async (e, notification) => {
+    if (!isEditable) return;
     e.preventDefault();
     const newInfo = {
       userId: user._id,
@@ -213,7 +221,7 @@ export default function Profile() {
           document.getElementById('notification-text');
         notificationElement.className = 'text-red-500 font-bold';
         notificationElement.innerHTML = ' DISABLED';
-        document.getElementById('notification').value = 'DISABLED';
+        document.getElementById('notification-text').value = 'DISABLED';
       } else {
         createNotification(resp, false);
       }
@@ -221,23 +229,24 @@ export default function Profile() {
   };
 
   return (
-    <div className="flex flex-row items-center">
-      <div className="float-left p-4 h-screen w-1/3 xs:hidden"></div>
-      <div className="float-left p-4 h-screen md:w-2/3 w-full flex flex-col justify-start">
+    <div className="flex flex-row justify-center mt-4">
+      <div className="float-left p-4 h-screen w-1/3 xs:hidden justify-center"></div>
+      <div className="float-left p-4 md:h-1/3 md:w-2/3 flex flex-col justify-center overflow-auto">
         <div
           id="info"
-          className="bg-gray-200 w-2/3 mx-auto p-8 md:p-12 rounded-lg shadow-xl mb-10 overflow-auto"
+          className="bg-gray-200 md:w-2/3 mx-auto p-8 md:p-12 rounded-lg shadow-xl "
         >
           <div className="flex justify-center h-auto">
             <form>
               <img
                 id="avatar"
                 onClick={() => {
-                  document.getElementById('avatar-upload').click();
+                  if (isEditable)
+                    document.getElementById('avatar-upload').click();
                 }}
                 src={
-                  info?.img !== ''
-                    ? '/uploads/' + info?.img
+                  profileUser?.info?.img !== undefined
+                    ? '/uploads/' + profileUser?.info?.img
                     : 'https://image.flaticon.com/icons/png/512/847/847969.png'
                 }
                 alt=""
@@ -257,7 +266,7 @@ export default function Profile() {
               <li className="hover:bg-gray-400 rounded-lg px-3 py-4 w-auto">
                 <button
                   onClick={() => {
-                    if (document.body.scrollWidth >= 1440) {
+                    if (document.body.scrollWidth >= 1440 && isEditable) {
                       document.getElementById(
                         'notification-form'
                       ).style.display = 'none';
@@ -267,14 +276,6 @@ export default function Profile() {
                       document.getElementById('info-form').style.display =
                         'block';
                     } else {
-                      document.getElementById(
-                        'notification-form'
-                      ).style.display = 'none';
-                      document.getElementById(
-                        'notification-form'
-                      ).style.display = 'none';
-                      document.getElementById('info-form').style.display =
-                        'none';
                       setOpenInfo(true);
                     }
                   }}
@@ -285,8 +286,7 @@ export default function Profile() {
               <li className="hover:bg-gray-400 rounded-lg px-3 py-4">
                 <button
                   onClick={() => {
-                    console.log(document.body.scrollWidth);
-                    if (document.body.scrollWidth >= 1440) {
+                    if (document.body.scrollWidth >= 1440 && isEditable) {
                       document.getElementById('info-form').style.display =
                         'none';
                       document.getElementById(
@@ -295,7 +295,7 @@ export default function Profile() {
                       document.getElementById('security-form').style.display =
                         'block';
                     } else {
-                      setOpenSecurity(true);
+                      if (isEditable) setOpenSecurity(true);
                     }
                   }}
                 >
@@ -305,7 +305,7 @@ export default function Profile() {
               <li className="hover:bg-gray-400 rounded-lg px-3 py-4">
                 <button
                   onClick={() => {
-                    if (document.body.scrollWidth >= 1440) {
+                    if (document.body.scrollWidth >= 1440 && isEditable) {
                       document.getElementById('info-form').style.display =
                         'none';
                       document.getElementById('security-form').style.display =
@@ -314,7 +314,7 @@ export default function Profile() {
                         'notification-form'
                       ).style.display = 'block';
                     } else {
-                      setOpenNotification(true);
+                      if (isEditable) setOpenNotification(true);
                     }
                   }}
                 >
@@ -338,7 +338,7 @@ export default function Profile() {
                   type="text"
                   id="name"
                   readOnly
-                  value={user?.name ?? ''}
+                  value={profileUser?.name ?? ''}
                 />
               </div>
               <div className="mb-6 pt-3 rounded bg-gray-300">
@@ -354,7 +354,7 @@ export default function Profile() {
                   type="text"
                   id="surname"
                   readOnly
-                  value={user?.surname ?? ''}
+                  value={profileUser?.surname ?? ''}
                 />
               </div>
               <div className="mb-6 pt-3 rounded bg-gray-300">
@@ -370,7 +370,7 @@ export default function Profile() {
                   type="number"
                   id="telephone"
                   readOnly
-                  value={user?.telephone ?? ''}
+                  value={profileUser?.telephone ?? ''}
                 />
               </div>
               <div className="mb-6 pt-3 rounded bg-gray-300">
@@ -386,7 +386,7 @@ export default function Profile() {
                   type="text"
                   id="email"
                   readOnly
-                  value={user?.email ?? ''}
+                  value={profileUser?.email ?? ''}
                 />
               </div>
               <div className="mb-6 pt-3 rounded bg-gray-300">
@@ -401,6 +401,7 @@ export default function Profile() {
                   className="bg-gray-300 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 border-red-800 transition duration-500 px-3 pb-3"
                   type="text"
                   id="address"
+                  readOnly={!isEditable}
                   defaultValue={info?.address ?? ''}
                   onChange={(e) => setAddress(e.target.value)}
                 />
@@ -417,6 +418,7 @@ export default function Profile() {
                   className="bg-gray-300 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 border-red-800 transition duration-500 px-3 pb-3"
                   type="text"
                   id="city"
+                  readOnly={!isEditable}
                   defaultValue={info?.city ?? ''}
                   onChange={(e) => setCity(e.target.value)}
                 />
@@ -433,11 +435,12 @@ export default function Profile() {
                   className="bg-gray-300 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 border-red-800 transition duration-500 px-3 pb-3"
                   type="number"
                   id="zip"
+                  readOnly={!isEditable}
                   defaultValue={info?.zip ?? ''}
                   onChange={(e) => setZip(e.target.value)}
                 />
               </div>
-              <div className="flex flex-row justify-center">
+              <div id="btn-update" className="flex justify-center">
                 <button
                   onClick={handleUpdateInfo}
                   className="bg-red-800 text-white font-bold py-3 px-8 rounded hover:bg-red-600 shadow"
@@ -541,7 +544,7 @@ export default function Profile() {
                 id="name"
                 label="Name"
                 type="text"
-                value={user?.name ?? ''}
+                value={profileUser?.name ?? ''}
                 readOnly
                 fullWidth
               />
@@ -551,7 +554,7 @@ export default function Profile() {
                 id="surname"
                 label="Surname"
                 type="text"
-                value={user?.surname ?? ''}
+                value={profileUser?.surname ?? ''}
                 readOnly
                 fullWidth
               />
@@ -561,7 +564,7 @@ export default function Profile() {
                 id="name"
                 label="Telephone"
                 type="number"
-                value={user?.telephone ?? ''}
+                value={profileUser?.telephone ?? ''}
                 fullWidth
               />
               <TextField
@@ -570,19 +573,22 @@ export default function Profile() {
                 id="email"
                 label="email"
                 type="text"
-                value={user?.email ?? ''}
+                value={profileUser?.email ?? ''}
                 readOnly
                 fullWidth
               />
               <TextField
                 color="secondary"
                 margin="dense"
-                id="address"
+                id="address-tf"
                 label="Address"
                 type="text"
                 defaultValue={info?.address ?? ''}
+                InputProps={{
+                  readOnly: !isEditable,
+                }}
                 fullWidth
-                onChange={(e) => setAddress(e.target.value)}
+                //onChange={(e) => setAddress(e.target.value)}
               />
               <TextField
                 color="secondary"
@@ -592,6 +598,9 @@ export default function Profile() {
                 type="text"
                 defaultValue={info?.city ?? ''}
                 fullWidth
+                InputProps={{
+                  readOnly: !isEditable,
+                }}
                 onChange={(e) => setCity(e.target.value)}
               />
               <TextField
@@ -602,6 +611,9 @@ export default function Profile() {
                 type="number"
                 defaultValue={info?.zip ?? ''}
                 fullWidth
+                InputProps={{
+                  readOnly: !isEditable,
+                }}
                 onChange={(e) => setZip(e.target.value)}
               />
               <DialogActions>
