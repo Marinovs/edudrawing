@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
-import emailjs from 'emailjs-com';
-import { v4 as uuidv4 } from 'uuid';
 
 export default function Reset() {
   const [newpassword, setPassword] = useState();

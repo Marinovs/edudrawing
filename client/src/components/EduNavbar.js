@@ -69,6 +69,12 @@ function notAuthenticated() {
 }
 
 function authenticated() {
+  const handleProfile = () => {
+    sessionStorage.setItem('selected_user', JSON.stringify(token));
+    window.location.reload();
+    window.location.href = `http://localhost:3000/profile/${token._id}`;
+  };
+
   return (
     <div id="navbar" className="bg-red-800">
       <nav className="">
@@ -85,14 +91,7 @@ function authenticated() {
                   <div className="flex items-center space-x-6">
                     <Link
                       className="font-bold text-white uppercase"
-                      onClick={() => {
-                        sessionStorage.setItem(
-                          'selected_user',
-                          JSON.stringify(token)
-                        );
-                        window.location.reload();
-                        window.location.href = `http://localhost:3000/profile/${token._id}`;
-                      }}
+                      onClick={handleProfile}
                       to={`http://localhost:3000/profile/${token._id}`}
                     >
                       {token.name}
@@ -153,11 +152,7 @@ function authenticated() {
         <div id="subMenu" hidden>
           <Link
             className="flex py-2 px-4 text-sm text-white hover:bg-gray-200 hover:text-red-800"
-            onClick={() => {
-              sessionStorage.setItem('selected_user', JSON.stringify(token));
-              window.location.reload();
-              window.location.href = `http://localhost:3000/profile/${token._id}`;
-            }}
+            onClick={handleProfile}
             to={`http://localhost:3000/profile/${token._id}`}
           >
             <svg

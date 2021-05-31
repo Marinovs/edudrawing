@@ -8,7 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { Avatar, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 
 export default class Rooms extends React.Component {
   constructor(props) {

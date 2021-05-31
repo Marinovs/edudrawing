@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -32,19 +31,16 @@ export default function Reset() {
         )
         .then(
           async (result) => {
-            const resp = await fetch(
-              'http://localhost:5000/api/passwords/put',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  user: data.user[0]._id,
-                  code: document.getElementById('message').value,
-                }),
-              }
-            );
+            await fetch('http://localhost:5000/api/passwords/put', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                user: data.user[0]._id,
+                code: document.getElementById('message').value,
+              }),
+            });
 
             document.getElementById('alert')?.remove();
             const alertDiv = document.createElement('div');
