@@ -20,27 +20,28 @@ npm start
 To run Back-end:
 
 ```sh
+cd server/
 npm run dev
 ```
 
 <details>
  <summary>IMAGES</summary>
  
-#HOMEPAGE
-![Homepage (not logged)](client/src/assets/home_notlogged.png?raw=true)
-[Homepage (logged)](client/src/assets/home_notlogged.png?raw=true)
+- HOMEPAGE
+![Homepage (not logged)](client/img/home_notlogged.png?raw=true)
+![Homepage (logged)](client/img/home_logged.png?raw=true)
 
-#ROOMS
-![Rooms](client/src/assets/rooms.png?raw=true)
+- ROOMS
+  ![Rooms](client/img/rooms.png?raw=true)
 
-#PROFILE
-![Profile](client/src/assets/profile.png?raw=true)
+- PROFILE
+  ![Profile](client/img/profile.png?raw=true)
 
-#EDITOR
-![Editor](client/src/assets/editor.png?raw=true)
+- EDITOR
+  ![Editor](client/img/editor.png?raw=true)
 
-#MEMBERS
-![Members](client/src/assets/members.png?raw=true)
+- MEMBERS
+  ![Members](client/img/members.png?raw=true)
 
 </details>
 
