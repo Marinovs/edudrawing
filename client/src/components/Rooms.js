@@ -1,4 +1,5 @@
 import React from 'react';
+import emailjs from 'emailjs-com';
 
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -115,6 +116,33 @@ export default class Rooms extends React.Component {
       }
     };
 
+    function handleCreateForm(u, ue, n, s) {
+      const form = document.createElement('form');
+
+      const user = document.createElement('input');
+      user.value = u;
+      user.name = 'user';
+
+      const user_email = document.createElement('input');
+      user_email.value = ue;
+      user_email.name = 'user_email';
+
+      const name = document.createElement('input');
+      name.value = n;
+      name.name = 'room';
+
+      const subject = document.createElement('input');
+      subject.value = s;
+      subject.name = 'subject';
+
+      form.appendChild(user);
+      form.appendChild(user_email);
+      form.appendChild(name);
+      form.appendChild(subject);
+
+      return form;
+    }
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       const name = this.state.name;
@@ -132,10 +160,32 @@ export default class Rooms extends React.Component {
       if (response.token === undefined) {
         createErrorNotification(response);
       } else {
+        const resp = await fetch('http://localhost:5000/api/users/', {
+          method: 'GET',
+        });
+
+        const members = await resp.json();
+        console.log(e.target);
+        //members.then((x) => console.log(x));
+        await members.forEach(async (x) => {
+          const form = handleCreateForm(master.name, x.email, name, subject);
+          if (x.info.notification) {
+            await emailjs
+              .sendForm(
+                'service_ch81o74',
+                'template_9fy89q6',
+                form,
+                'user_160hjV2U1BkvN1IXQEIX2'
+              )
+              .then(async (result) => console.log(result));
+          }
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         this.setState({ room: response.room });
         this.setState({ open: false });
         sessionStorage.setItem('room', JSON.stringify(response.room));
-        window.location.reload();
+        //window.location.reload();
         window.location.href = `http://localhost:3000/rooms/${response.room._id}`;
       }
     };
@@ -300,13 +350,14 @@ export default class Rooms extends React.Component {
                 aria-labelledby="form-dialog-title"
               >
                 <DialogTitle id="form-dialog-title">Create Room</DialogTitle>
-                <DialogContent>
+                <DialogContent onSubmit={handleSubmit}>
                   <TextField
                     autoFocus
                     margin="dense"
                     id="name"
                     label="Room name"
                     type="name"
+                    name="room"
                     fullWidth
                     onChange={(e) => this.setState({ name: e.target.value })}
                   />
@@ -315,9 +366,12 @@ export default class Rooms extends React.Component {
                     id="subject"
                     label="Subject"
                     type="subject"
+                    name="subject"
                     fullWidth
                     onChange={(e) => this.setState({ subject: e.target.value })}
                   />
+                  <input hidden id="user_email" name="user_email" />
+                  <input hidden id="user" name="user" />
                   <FormControlLabel
                     control={
                       <Checkbox

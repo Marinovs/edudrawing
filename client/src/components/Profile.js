@@ -241,11 +241,11 @@ export default function Profile() {
               <img
                 id="avatar"
                 onClick={() => {
-                  if (isEditable)
+                  if (profileUser._id === user._id)
                     document.getElementById('avatar-upload').click();
                 }}
                 src={
-                  profileUser?.info?.img !== undefined
+                  profileUser?.info?.img !== ''
                     ? '/uploads/' + profileUser?.info?.img
                     : 'https://image.flaticon.com/icons/png/512/847/847969.png'
                 }
@@ -276,7 +276,7 @@ export default function Profile() {
                       document.getElementById('info-form').style.display =
                         'block';
                     } else {
-                      setOpenInfo(true);
+                      if (profileUser._id === user._id) setOpenInfo(true);
                     }
                   }}
                 >
@@ -295,7 +295,7 @@ export default function Profile() {
                       document.getElementById('security-form').style.display =
                         'block';
                     } else {
-                      if (isEditable) setOpenSecurity(true);
+                      if (profileUser._id === user._id) setOpenSecurity(true);
                     }
                   }}
                 >
@@ -314,7 +314,8 @@ export default function Profile() {
                         'notification-form'
                       ).style.display = 'block';
                     } else {
-                      if (isEditable) setOpenNotification(true);
+                      if (profileUser._id === user._id)
+                        setOpenNotification(true);
                     }
                   }}
                 >

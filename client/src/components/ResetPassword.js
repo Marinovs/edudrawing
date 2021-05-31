@@ -21,7 +21,6 @@ export default function Reset() {
 
     const data = await response.json();
     if (data.user.length > 0) {
-      console.log(emailjs);
       emailjs
         .sendForm(
           'service_ch81o74',

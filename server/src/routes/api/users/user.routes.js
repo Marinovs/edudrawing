@@ -18,7 +18,24 @@ mongoose.connect(
 
 router.get('/api/users', async (req, res) => {
   const users = await Users.find();
-  res.send(users);
+  const infos = await Infos.find();
+  let usrs = [];
+  users.forEach(async (element) => {
+    const usr = {
+      _id: element._id,
+      name: element.name,
+      surname: element.surname,
+      email: element.email,
+      password: element.password,
+      telephone: element.telephone,
+      isTeacher: element.isTeacher,
+    };
+    const info = infos.filter((x) => x.userId == element._id);
+
+    if (info) usr.info = info[0];
+    usrs.push(usr);
+  });
+  res.send(usrs);
 });
 
 router.post('/api/users/find', async (req, res) => {
